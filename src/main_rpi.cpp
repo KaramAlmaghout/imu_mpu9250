@@ -8,8 +8,8 @@ int main(int argc, char **argv)
     auto driver = std::make_shared<rpi_driver>();
 
     // Create the node.
-    ros_node node(driver, argc, argv);
+    ros_node::ros_node ros_node node(driver, argc, argv);
 
     // Run the node.
-    node.spin();
+    // node.spin();
 }

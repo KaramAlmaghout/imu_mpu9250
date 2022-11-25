@@ -13,10 +13,11 @@ ros_node::ros_node(std::shared_ptr<driver> driver, int argc, char **argv)
     ros_node::m_driver = driver;
 
     // Initialize the ROS node.
-    ros::init(argc, argv, "driver_mpu9250");
+    // ros::init(argc, argv, "driver_mpu9250");
+    rclcpp::init(argc, argv);
 
     // Get the node's handle.
-    ros_node::m_node = std::make_shared<rclcpp::Node>();
+    ros_node::m_node = rclcpp::Node::make_shared("driver_mpu9250");
 
     // // Read parameters.
     // ros::NodeHandle private_node("~");
@@ -34,12 +35,16 @@ ros_node::ros_node(std::shared_ptr<driver> driver, int argc, char **argv)
     ros_node::m_calibration_magnetometer.load(private_node, "calibration/magnetometer");
 
     // Set up data publishers.
-    ros_node::m_publisher_accelerometer = ros_node::m_node->advertise<sensor_msgs_ext::accelerometer>("imu/accelerometer", 1);
-    ros_node::m_publisher_gyroscope = ros_node::m_node->advertise<sensor_msgs_ext::gyroscope>("imu/gyroscope", 1);
-    ros_node::m_publisher_magnetometer = ros_node::m_node->advertise<sensor_msgs_ext::magnetometer>("imu/magnetometer", 1);
-    ros_node::m_publisher_temperature = ros_node::m_node->advertise<sensor_msgs_ext::temperature>("imu/temperature", 1);
-    
+    // ros_node::m_publisher_accelerometer = ros_node::m_node->advertise<sensor_msgs_ext::accelerometer>("imu/accelerometer", 1);
+    // ros_node::m_publisher_gyroscope = ros_node::m_node->advertise<sensor_msgs_ext::gyroscope>("imu/gyroscope", 1);
+    // ros_node::m_publisher_magnetometer = ros_node::m_node->advertise<sensor_msgs_ext::magnetometer>("imu/magnetometer", 1);
+    // ros_node::m_publisher_temperature = ros_node::m_node->advertise<sensor_msgs_ext::temperature>("imu/temperature", 1);
+    ros_node::m_publisher_accelerometer =  this->create_publisher<sensor_msgs_ext::msg::Accelerometer>("imu/accelerometer", 1);
+    ros_node::m_publisher_gyroscope =  this->create_publisher<sensor_msgs_ext::msg::Gyroscope>("imu/gyroscope", 1);
+    ros_node::m_publisher_magnetometer =  this->create_publisher<sensor_msgs_ext::msg::Magnetometer>("imu/magnetometer", 1);
+    ros_node::m_publisher_temperature =  this->create_publisher<sensor_msgs_ext::msg::Temperature>("imu/temperature", 1);
     // Initialize the driver and set parameters.
+
     try
     {
         // Attach the data callback.
@@ -61,8 +66,8 @@ ros_node::ros_node(std::shared_ptr<driver> driver, int argc, char **argv)
     }
 
     // Set up services.
-    ros_node::m_service_calibrate_gyroscope = ros_node::m_node->advertiseService("imu/calibrate_gyroscope", &ros_node::service_calibrate_gyroscope, this);
-
+    // ros_node::m_service_calibrate_gyroscope = ros_node::m_node->advertiseService("imu/calibrate_gyroscope", &ros_node::service_calibrate_gyroscope, this);
+    ros_node::m_service_calibrate_gyroscope = ros_node::m_node->create_service<sensor_msgs_ext::srv::CalibrateGyroscope>("imu/calibrate_gyroscope", &ros_node::service_calibrate_gyroscope, this);
     // Perform initial gyroscope calibration.
     ros_node::calibrate_gyroscope(500);
 }
@@ -71,7 +76,7 @@ ros_node::ros_node(std::shared_ptr<driver> driver, int argc, char **argv)
 void ros_node::spin()
 {
     // Spin.
-    rclcpp::spin()
+    rclcpp::spin(ros_node::m_node);
 
     // Deinitialize driver.
     ros_node::deinitialize_driver();
@@ -91,7 +96,7 @@ bool ros_node::service_calibrate_gyroscope(sensor_msgs_ext::calibrate_gyroscopeR
 bool ros_node::calibrate_gyroscope(uint32_t averaging_period)
 {
     // Convert averaging period to duration.
-    ros::Duration averaging_duration(static_cast<double>(averaging_period) / 1000.0);
+    rclcpp::Duration averaging_duration(static_cast<double>(averaging_period) / 1000.0);
 
     // Clear the collection window.
     ros_node::m_gyroscope_calibration_window.clear();
