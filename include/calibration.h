@@ -12,7 +12,8 @@
 #ifndef MPU9250_CALIBRATION_H
 #define MPU9250_CALIBRATION_H
 
-#include <ros/node_handle.h>
+// #include <ros/node_handle.h>
+#include "rclcpp/rclcpp.hpp"
 #include <vector>
 #include <eigen3/Eigen/Dense>
 
@@ -29,7 +30,7 @@ public:
     /// \param node_handle The node handle to read the parameter from.
     /// \param param_name The name of the ROS parameter to read from.
     /// \note If the parameter doesn't exist or is invalid, the calibration remains unchanged.
-    void load(ros::NodeHandle& node_handle, std::string param_name);
+    void load(rclcpp::Node& node_handle, std::string param_name);
     /// \brief Updates the calibration's transformation matrix.
     /// \param new_calibration The new transformation matrix to set.
     void update(const Eigen::Matrix4d& new_transform);

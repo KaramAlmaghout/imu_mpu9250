@@ -14,11 +14,17 @@
 #include "driver.h"
 #include "calibration.h"
 
-#include <ros/ros.h>
-#include <sensor_msgs_ext/calibrate_gyroscope.h>
+#include "rclcpp/rclcpp.hpp"
+#include <sensor_msgs_ext/srv/calibrate_gyroscope.hpp>
 
 #include <atomic>
 #include <deque>
+
+#include "rclcpp/rclcpp.hpp"
+#include <sensor_msgs_ext/msg/accelerometer.hpp>
+#include <sensor_msgs_ext/msg/gyroscope.hpp>
+#include <sensor_msgs_ext/msg/magnetometer.hpp>
+#include <sensor_msgs_ext/msg/temperature.hpp>
 
 /// \brief Implements the driver's ROS node functionality.
 class ros_node
@@ -60,26 +66,30 @@ private:
 
     // ROS
     /// \brief m_node The node's handle.
-    std::shared_ptr<ros::NodeHandle> m_node;
+    std::shared_ptr<rclcpp::Node> m_node;
 
     // PUBLISHERS - DATA
     /// \brief Publisher for accelerometer data.
-    ros::Publisher m_publisher_accelerometer;
+    // ros::Publisher m_publisher_accelerometer;
+    rclcpp::Publisher<sensor_msgs_ext::msg::Accelerometer>::SharedPtr m_publisher_accelerometer;
     /// \brief Publisher for gyroscope data.
-    ros::Publisher m_publisher_gyroscope;
+    // ros::Publisher m_publisher_gyroscope;
+    rclcpp::Publisher<sensor_msgs_ext::msg::Gyroscope>::SharedPtr m_publisher_gyroscope;    
     /// \brief Publisher for magnetometer data.
-    ros::Publisher m_publisher_magnetometer;
+    // ros::Publisher m_publisher_magnetometer;
+    rclcpp::Publisher<sensor_msgs_ext::msg::Magnetometer>::SharedPtr m_publisher_magnetometer;
     /// \brief Publisher for temperature data.
-    ros::Publisher m_publisher_temperature;
+    // ros::Publisher m_publisher_temperature;
+    rclcpp::Publisher<sensor_msgs_ext::msg::Temperature>::SharedPtr m_publisher_temperature;
 
     // SERVICES
     /// \brief Service server for calibrating the gyroscope.
-    ros::ServiceServer m_service_calibrate_gyroscope;
+    rclcpp::Service<sensor_msgs_ext::srv::CalibrateGyroscope> m_service_calibrate_gyroscope;
     /// \brief A service for calibrating the gyroscope.
     /// \param request The service request.
     /// \param response The service response.
     /// \returns TRUE if the service completed successfully, otherwise FALSE.
-    bool service_calibrate_gyroscope(sensor_msgs_ext::calibrate_gyroscopeRequest& request, sensor_msgs_ext::calibrate_gyroscopeResponse& response);
+    bool service_calibrate_gyroscope(sensor_msgs_ext::srv::CalibrateGyroscope::Request& request, sensor_msgs_ext::srv::CalibrateGyroscope::Response& response);
 
     // METHODS
     /// \brief deinitialize_driver Deinitializes the driver.

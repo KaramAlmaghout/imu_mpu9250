@@ -8,15 +8,16 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(sensor_msgs_ext REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
-# add_executable(time_example src/main.cpp)
-# ament_target_dependencies(time_example
-#   rclcpp
-#   std_msgs
-# )
+add_executable(imu_node src/main_rpi.cpp)
+ament_target_dependencies(imu_node
+  rclcpp
+  sensor_msgs_ext
+)
 
 
 if(BUILD_TESTING)
