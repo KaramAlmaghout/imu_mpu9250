@@ -62,7 +62,7 @@ private:
     /// \brief Runs a zero-velocity calibration on the gyroscope to remove bias.
     /// \param averaging_period The number of milliseconds to average data over to calculate bias.
     /// \returns TRUE if the calibration succeeded, otherwise FALSE.
-    // bool calibrate_gyroscope(uint32_t averaging_period);
+    // bool  (uint32_t averaging_period);
 
     // ROS
     /// \brief m_node The node's handle.
@@ -84,12 +84,12 @@ private:
 
     // SERVICES
     /// \brief Service server for calibrating the gyroscope.
-    // rclcpp::Service<sensor_msgs_ext::srv::CalibrateGyroscope> m_service_calibrate_gyroscope;
+    rclcpp::Service<sensor_msgs_ext::srv::CalibrateGyroscope> m_service_ ;
     /// \brief A service for calibrating the gyroscope.
     /// \param request The service request.
     /// \param response The service response.
     /// \returns TRUE if the service completed successfully, otherwise FALSE.
-    // bool service_calibrate_gyroscope(sensor_msgs_ext::srv::CalibrateGyroscope::Request& request, sensor_msgs_ext::srv::CalibrateGyroscope::Response& response);
+    // bool service_ (sensor_msgs_ext::srv::CalibrateGyroscope::Request& request, sensor_msgs_ext::srv::CalibrateGyroscope::Response& response);
 
     // METHODS
     /// \brief deinitialize_driver Deinitializes the driver.

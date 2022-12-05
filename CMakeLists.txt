@@ -13,11 +13,12 @@ find_package(sensor_msgs_ext REQUIRED)
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 
-add_executable(imu_node src/main_rpi.cpp)
+add_executable(imu_node src/main_rpi.cpp src/ros_node.cpp src/calibration.cpp src/rpi_driver.cpp src/driver.cpp)
 ament_target_dependencies(imu_node
   rclcpp
   sensor_msgs_ext
 )
+target_link_libraries(imu_node pigpiod_if2)
 
 
 if(BUILD_TESTING)

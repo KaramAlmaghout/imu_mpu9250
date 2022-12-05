@@ -1,6 +1,7 @@
-#include "../include/calibration.h"
+// #include "../include/calibration.h"
+#include "calibration.h"
 
-#include <ros/names.h>
+// #include <ros/names.h>
 
 // CONSTRUCTORS
 calibration::calibration()
@@ -17,7 +18,7 @@ void calibration::load(rclcpp::Node& node_handle, std::string param_name)
 {
     // Try reading the calibration parameter.
     std::vector<double> components;
-    if(!node_handle.getParam(param_name, components))
+    if(!node_handle.get_parameter(param_name, components))
     {
         // Param not found, quit.
         return;
@@ -26,7 +27,7 @@ void calibration::load(rclcpp::Node& node_handle, std::string param_name)
     // Check validity of parameter.
     if(components.size() != 16)
     {
-        ROS_ERROR_STREAM("invalid parameter for 4x4 calibration matrix: " << param_name);
+        // RCLCPP_ERROR_STREAM("invalid parameter for 4x4 calibration matrix: " << param_name);
         return;
     }
 
@@ -40,7 +41,7 @@ void calibration::load(rclcpp::Node& node_handle, std::string param_name)
         }
     }
 
-    ROS_INFO_STREAM("loaded calibration matrix from " << param_name);
+    // RCLCPP_INFO_STREAM("loaded calibration matrix from " << param_name);
 }
 void calibration::update(const Eigen::Matrix4d& new_transform)
 {

@@ -1,4 +1,4 @@
-#include "../include/rpi_driver.h"
+#include "rpi_driver.h"
 
 #include <pigpiod_if2.h>
 #include <stdexcept>

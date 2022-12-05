@@ -20,15 +20,15 @@ ros_node::ros_node(std::shared_ptr<driver> driver, int argc, char **argv)
     ros_node::m_node = rclcpp::Node::make_shared("driver_mpu9250");
 
     // // Read parameters.
-    // ros::NodeHandle private_node("~");
-    // int param_i2c_bus = private_node.param<int>("i2c_bus", 1);
-    // int param_i2c_address = private_node.param<int>("i2c_address", 0x68);
-    // int param_interrupt_pin = private_node.param<int>("interrupt_gpio_pin", 0);
-    // int param_gyro_dlpf_frequency = private_node.param<int>("gyro_dlpf_frequency", 0);
-    // int param_accel_dlpf_frequency = private_node.param<int>("accel_dlpf_frequency", 0);
-    // int param_gyro_fsr = private_node.param<int>("gyro_fsr", 0);
-    // int param_accel_fsr = private_node.param<int>("accel_fsr", 0);
-    // float param_max_data_rate = private_node.param<float>("max_data_rate", 8000.0F);
+    rclcpp::Node private_node("~");
+    int param_i2c_bus = private_node.declare_parameter("i2c_bus", 1);
+    int param_i2c_address = private_node.declare_parameter("i2c_address", 0x68);
+    int param_interrupt_pin = private_node.declare_parameter("interrupt_gpio_pin", 0);
+    int param_gyro_dlpf_frequency = private_node.declare_parameter("gyro_dlpf_frequency", 0);
+    int param_accel_dlpf_frequency = private_node.declare_parameter("accel_dlpf_frequency", 0);
+    int param_gyro_fsr = private_node.declare_parameter("gyro_fsr", 0);
+    int param_accel_fsr = private_node.declare_parameter("accel_fsr", 0);
+    float param_max_data_rate = private_node.declare_parameter("max_data_rate", 8000.0F);
 
     // Read calibrations.
     ros_node::m_calibration_accelerometer.load(private_node, "calibration/accelerometer");
@@ -39,10 +39,10 @@ ros_node::ros_node(std::shared_ptr<driver> driver, int argc, char **argv)
     // ros_node::m_publisher_gyroscope = ros_node::m_node->advertise<sensor_msgs_ext::gyroscope>("imu/gyroscope", 1);
     // ros_node::m_publisher_magnetometer = ros_node::m_node->advertise<sensor_msgs_ext::magnetometer>("imu/magnetometer", 1);
     // ros_node::m_publisher_temperature = ros_node::m_node->advertise<sensor_msgs_ext::temperature>("imu/temperature", 1);
-    ros_node::m_publisher_accelerometer =  this->create_publisher<sensor_msgs_ext::msg::Accelerometer>("imu/accelerometer", 1);
-    ros_node::m_publisher_gyroscope =  this->create_publisher<sensor_msgs_ext::msg::Gyroscope>("imu/gyroscope", 1);
-    ros_node::m_publisher_magnetometer =  this->create_publisher<sensor_msgs_ext::msg::Magnetometer>("imu/magnetometer", 1);
-    ros_node::m_publisher_temperature =  this->create_publisher<sensor_msgs_ext::msg::Temperature>("imu/temperature", 1);
+    ros_node::m_publisher_accelerometer =  m_node->create_publisher<sensor_msgs_ext::msg::Accelerometer>("imu/accelerometer", 1);
+    ros_node::m_publisher_gyroscope =  m_node->create_publisher<sensor_msgs_ext::msg::Gyroscope>("imu/gyroscope", 1);
+    ros_node::m_publisher_magnetometer =  m_node->create_publisher<sensor_msgs_ext::msg::Magnetometer>("imu/magnetometer", 1);
+    ros_node::m_publisher_temperature =  m_node->create_publisher<sensor_msgs_ext::msg::Temperature>("imu/temperature", 1);
     // Initialize the driver and set parameters.
 
     try
@@ -56,20 +56,20 @@ ros_node::ros_node(std::shared_ptr<driver> driver, int argc, char **argv)
         ros_node::m_driver->p_gyro_fsr(static_cast<driver::gyro_fsr_type>(param_gyro_fsr));
         ros_node::m_driver->p_accel_fsr(static_cast<driver::accel_fsr_type>(param_accel_fsr));
 
-        ROS_INFO_STREAM("mpu9250 driver successfully initialized on i2c bus " << param_i2c_bus << " at address 0x" << std::hex << param_i2c_address);
-        ROS_INFO_STREAM("sensor data rate is " << data_rate << " hz");
+        // RCLCPP_INFO_STREAM("mpu9250 driver successfully initialized on i2c bus " << param_i2c_bus << " at address 0x" << std::hex << param_i2c_address);
+        // RCLCPP_INFO_STREAM("sensor data rate is " << data_rate << " hz");
     }
     catch (std::exception& e)
     {
-        ROS_FATAL_STREAM(e.what());
+        // RCLCPP_FATAL_STREAM(e.what());
         exit(1);
     }
 
     // Set up services.
     // ros_node::m_service_calibrate_gyroscope = ros_node::m_node->advertiseService("imu/calibrate_gyroscope", &ros_node::service_calibrate_gyroscope, this);
-    ros_node::m_service_calibrate_gyroscope = ros_node::m_node->create_service<sensor_msgs_ext::srv::CalibrateGyroscope>("imu/calibrate_gyroscope", &ros_node::service_calibrate_gyroscope, this);
+    // rclcpp::Service<sensor_msgs_ext::srv::CalibrateGyroscope>::SharedPtr m_service_calibrate_gyroscope = m_node.create_service<sensor_msgs_ext::srv::CalibrateGyroscope>("imu/calibrate_gyroscope", std::bind(&ros_node::service_calibrate_gyroscope, this));
     // Perform initial gyroscope calibration.
-    ros_node::calibrate_gyroscope(500);
+    // ros_node::calibrate_gyroscope(500);
 }
 
 // ROS
@@ -83,65 +83,65 @@ void ros_node::spin()
 }
 
 // SERVICES
-bool ros_node::service_calibrate_gyroscope(sensor_msgs_ext::calibrate_gyroscopeRequest& request, sensor_msgs_ext::calibrate_gyroscopeResponse& response)
-{
-    response.success = ros_node::calibrate_gyroscope(request.averaging_period);
-    if(!response.success)
-    {
-        response.message = "failed to collect enough points for calibration";
-    }
+// bool ros_node::service_calibrate_gyroscope(sensor_msgs_ext::srv::CalibrateGyroscope::Request& request, sensor_msgs_ext::srv::CalibrateGyroscope::Response& response)
+// {
+//     response.success = ros_node::calibrate_gyroscope(request.averaging_period);
+//     if(!response.success)
+//     {
+//         response.message = "failed to collect enough points for calibration";
+//     }
 
-    return true;
-}
-bool ros_node::calibrate_gyroscope(uint32_t averaging_period)
-{
-    // Convert averaging period to duration.
-    rclcpp::Duration averaging_duration(static_cast<double>(averaging_period) / 1000.0);
+//     return true;
+// }
+// bool ros_node::calibrate_gyroscope(uint32_t averaging_period)
+// {
+//     // Convert averaging period to duration.
+//     rclcpp::Duration averaging_duration(static_cast<double>(averaging_period) / 1000.0);
 
-    // Clear the collection window.
-    ros_node::m_gyroscope_calibration_window.clear();
+//     // Clear the collection window.
+//     ros_node::m_gyroscope_calibration_window.clear();
 
-    // Enable the data collection.
-    ros_node::f_gyroscope_calibrating = true;
+//     // Enable the data collection.
+//     ros_node::f_gyroscope_calibrating = true;
 
-    // Sleep while gyro data is collected on interrupt thread.
-    averaging_duration.sleep();
+//     // Sleep while gyro data is collected on interrupt thread.
+//     averaging_duration.sleep();
 
-    // Disable the data collection.
-    ros_node::f_gyroscope_calibrating = false;
+//     // Disable the data collection.
+//     ros_node::f_gyroscope_calibrating = false;
 
-    // Check if the window contains data.
-    if(ros_node::m_gyroscope_calibration_window.size() < 5)
-    {
-        ROS_ERROR_STREAM("gyroscope calibration failed (not enough data: " << ros_node::m_gyroscope_calibration_window.size() << " points)");
-        return false;
-    }
+//     // Check if the window contains data.
+//     if(ros_node::m_gyroscope_calibration_window.size() < 5)
+//     {
+//         // RCLCPP_ERROR_STREAM("gyroscope calibration failed (not enough data: " << ros_node::m_gyroscope_calibration_window.size() << " points)");
+//         return false;
+//     }
 
-    // Iterate through window to calculate average.
-    Eigen::Vector3d average;
-    average.setZero();
-    for(auto point = ros_node::m_gyroscope_calibration_window.cbegin(); point != ros_node::m_gyroscope_calibration_window.cend(); ++point)
-    {
-        average += *point;
-    }
-    average /= static_cast<double>(ros_node::m_gyroscope_calibration_window.size());
+//     // Iterate through window to calculate average.
+//     Eigen::Vector3d average;
+//     average.setZero();
+//     for(auto point = ros_node::m_gyroscope_calibration_window.cbegin(); point != ros_node::m_gyroscope_calibration_window.cend(); ++point)
+//     {
+//         average += *point;
+//     }
+//     average /= static_cast<double>(ros_node::m_gyroscope_calibration_window.size());
 
-    // Clear window.
-    ros_node::m_gyroscope_calibration_window.clear();
+//     // Clear window.
+//     ros_node::m_gyroscope_calibration_window.clear();
 
-    // Create new homogeneous transform by subtracting out bias.
-    Eigen::Matrix4d calibration;
-    calibration.setIdentity();
-    calibration.block(0, 3, 3, 1) = -average;
+//     // Create new homogeneous transform by subtracting out bias.
+//     Eigen::Matrix4d calibration;
+//     calibration.setIdentity();
+//     calibration.block(0, 3, 3, 1) = -average;
 
-    // Update gyroscope calibration.
-    ros_node::m_calibration_gyroscope.update(calibration);
+//     // Update gyroscope calibration.
+//     ros_node::m_calibration_gyroscope.update(calibration);
 
-    // Log success.
-    ROS_INFO_STREAM("gyroscope calibration completed with averaging period of " << averaging_period << " ms");
+//     // Log success.
+//     // RCLCPP_INFO_STREAM("gyroscope calibration completed with averaging period of " << averaging_period << " ms");
 
-    return true;
-}
+//     return true;
+// }
 
 // METHODS
 void ros_node::deinitialize_driver()
@@ -149,11 +149,11 @@ void ros_node::deinitialize_driver()
     try
     {
         ros_node::m_driver->deinitialize();
-        ROS_INFO_STREAM("driver successfully deinitialized");
+        // RCLCPP_INFO_STREAM("driver successfully deinitialized");
     }
     catch (std::exception& e)
     {
-        ROS_FATAL_STREAM(e.what());
+        // RCLCPP_FATAL_STREAM(e.what());
     }
 }
 
@@ -161,7 +161,7 @@ void ros_node::deinitialize_driver()
 void ros_node::data_callback(driver::data data)
 {
     // Create accelerometer message.
-    sensor_msgs_ext::accelerometer message_accel;
+    sensor_msgs_ext::msg::Accelerometer message_accel;
     // Set accelerations (convert from g's to m/s^2)
     message_accel.x = static_cast<double>(data.accel_x) * 9.80665;
     message_accel.y = static_cast<double>(data.accel_y) * 9.80665;
@@ -169,10 +169,10 @@ void ros_node::data_callback(driver::data data)
     // Apply calibration.
     ros_node::m_calibration_accelerometer.calibrate(message_accel.x, message_accel.y, message_accel.z);
     // Publish message.
-    ros_node::m_publisher_accelerometer.publish(message_accel);
+    ros_node::m_publisher_accelerometer->publish(message_accel);
 
     // Create gyroscope message.
-    sensor_msgs_ext::gyroscope message_gyro;
+    sensor_msgs_ext::msg::Gyroscope message_gyro;
     // Set rotation rates (convert from deg/sec to rad/sec)
     message_gyro.x = static_cast<double>(data.gyro_x) * M_PI / 180.0;
     message_gyro.y = static_cast<double>(data.gyro_y) * M_PI / 180.0;
@@ -185,13 +185,13 @@ void ros_node::data_callback(driver::data data)
     // Apply calibration.
     ros_node::m_calibration_gyroscope.calibrate(message_gyro.x, message_gyro.y, message_gyro.z);
     // Publish message.
-    ros_node::m_publisher_gyroscope.publish(message_gyro);
+    ros_node::m_publisher_gyroscope->publish(message_gyro);
 
     // Check if there was a magneto overflow.
     if(std::isnan(data.magneto_x) == false)
     {
         // Create magneto message.
-        sensor_msgs_ext::magnetometer message_mag;
+        sensor_msgs_ext::msg::Magnetometer message_mag;
         // Fill magnetic field strengths (convert from uT to T)
         message_mag.x = static_cast<double>(data.magneto_x) * 0.000001;
         message_mag.y = static_cast<double>(data.magneto_y) * 0.000001;
@@ -199,12 +199,12 @@ void ros_node::data_callback(driver::data data)
         // Apply calibration.
         ros_node::m_calibration_magnetometer.calibrate(message_mag.x, message_mag.y, message_mag.z);
         // Publish message.
-        ros_node::m_publisher_magnetometer.publish(message_mag);
+        ros_node::m_publisher_magnetometer->publish(message_mag);
     }
 
     // Create temperature message.
-    sensor_msgs_ext::temperature message_temp;
+    sensor_msgs_ext::msg::Temperature message_temp;
     message_temp.temperature = static_cast<double>(data.temp);
     // Publish temperature message.
-    ros_node::m_publisher_temperature.publish(message_temp);
+    ros_node::m_publisher_temperature->publish(message_temp);
 }
